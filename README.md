@@ -27,9 +27,9 @@ npm ci
 npm run dev
 ```
 
-Open the local URL printed by Vite in your browser (normally [http://localhost:5173](http://localhost:5173)). Stop the server with `Ctrl+C`. Run `npm run build` to build the catalogue. For the Play agent, see the OpenRouter setup below.
+Open the local URL printed by Vite in your browser (normally [http://localhost:5173](http://localhost:5173)). Stop the server with `Ctrl+C`. Run `npm run typecheck` to check the React TypeScript sources and `npm run build` to type-check and build the catalogue. The frontend supports TypeScript/TSX, JavaScript/JSX, HTML, CSS, and Tailwind CSS utilities. Tailwind’s preflight reset is disabled so existing styles remain intact. For the Play agent, see the OpenRouter setup below.
 
-The catalogue lives in `demo/`. Its button uses the local Base UI clone and the open-source Motion npm package; the agent renderer uses the local OpenUI clone.
+The catalogue lives in `demo/`. Matching published Base UI and OpenUI packages supply TypeScript declarations; Vite runs the actual components and renderer from the local clones. Its button uses the local Base UI clone and the open-source Motion npm package; the agent renderer uses the local OpenUI clone.
 
 ## Workspace
 
@@ -42,7 +42,7 @@ The clones retain their own Git histories, upstream remotes, and license files. 
 
 ## Agent-readable components
 
-White Pepper UI gives components and their meaningful features stable, descriptive IDs so people can refer to the same design choices in prompts and code. The catalogue displays the IDs for the selected preview. Each component owns and exports its feature metadata alongside its implementation; `buttonSpec` in `demo/JellyButton.jsx` is the button’s source of truth.
+White Pepper UI gives components and their meaningful features stable, descriptive IDs so people can refer to the same design choices in prompts and code. The catalogue displays the IDs for the selected preview. Each component owns and exports its feature metadata alongside its implementation; `buttonSpec` in `demo/JellyButton.tsx` is the button’s source of truth.
 
 The Button exposes `wp.component.button`, `wp.shape.pill`, `wp.animation.jello-click`, and one of `wp.style.button.bright-blue` or `wp.style.button.dark-outline`. For example: “Use `wp.component.button` with `wp.style.button.dark-outline` and `wp.animation.jello-click`.” The animation is skipped when reduced motion is requested.
 
@@ -56,9 +56,9 @@ The catalogue includes `wp.component.dialog` and its `wp.animation.dialog.reshap
 
 ## OpenUI integration
 
-`demo/agent-library.jsx` registers the existing White Pepper button and dialog with OpenUI and exports `agentLibrary` and `agentSystemPrompt`. Component style and direction options use their `wp.*` IDs. The `WhitePepperScreen` root exposes two named regions (`main` and `side`); the host application decides what each region means and where it appears.
+`demo/agent-library.tsx` registers the existing White Pepper button and dialog with OpenUI and exports `agentLibrary` and `agentSystemPrompt`. Component style and direction options use their `wp.*` IDs. The `WhitePepperScreen` root exposes two named regions (`main` and `side`); the host application decides what each region means and where it appears.
 
-`AgentScreen` in `demo/AgentPreview.jsx` accepts `response`, `isStreaming`, `onAction`, and `onError`, so a host can pass OpenUI Lang from an agent or model stream to the renderer. The Play page can use the local OpenRouter backend or another compatible agent endpoint and render its OpenUI response. The example button jiggles and the example dialog opens fixed sample content; application actions are not yet implemented. The integration uses local OpenUI source; it does not use OpenUI's prebuilt visual component library or a hosted gateway.
+`AgentScreen` in `demo/AgentPreview.tsx` accepts `response`, `isStreaming`, `onAction`, and `onError`, so a host can pass OpenUI Lang from an agent or model stream to the renderer. The Play page can use the local OpenRouter backend or another compatible agent endpoint and render its OpenUI response. The example button jiggles and the example dialog opens fixed sample content; application actions are not yet implemented. The integration uses local OpenUI source; it does not use OpenUI's prebuilt visual component library or a hosted gateway.
 
 ## Connect Play to an agent
 
@@ -98,4 +98,4 @@ It returns a JSON object with a conversational `message` and an OpenUI Lang `out
 }
 ```
 
-The backend is responsible for calling an agent or model and protecting its credentials. Play also sends the current OpenUI program as `currentOutput` so the agent can preserve or modify it on follow-up turns. Play currently accepts a complete JSON response, not streamed responses. The available generated components, style IDs, and screen regions are defined in `demo/agent-library.jsx`.
+The backend is responsible for calling an agent or model and protecting its credentials. Play also sends the current OpenUI program as `currentOutput` so the agent can preserve or modify it on follow-up turns. Play currently accepts a complete JSON response, not streamed responses. The available generated components, style IDs, and screen regions are defined in `demo/agent-library.tsx`.

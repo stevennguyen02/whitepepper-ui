@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import { animate, useReducedMotion } from 'motion/react';
-import { Dialog } from '../base-ui/packages/react/src/dialog/index.ts';
+import { Dialog } from '@base-ui/react/dialog';
 
 export const dialogSpec = {
   id: 'wp.component.dialog',
@@ -15,10 +15,17 @@ export const dialogSpec = {
       const hour = index + 1;
       return [String(hour), { id: `wp.direction.clock.${hour}`, label: `${hour} o’clock` }];
     })),
-  },
+  } as Record<string, { id: string; label: string }>,
 };
 
-function getPosition(trigger, direction) {
+type DialogStyle = keyof typeof dialogSpec.styles;
+type Placement = { left: number; top: number; width: number; height: number; triggerBox: { left: number; top: number; width: number; height: number }; triggerRadius: string; triggerBackground: string };
+type Animation = ReturnType<typeof animate>;
+type Ref<T> = React.RefObject<T | null>;
+type DialogProps = { trigger: React.ReactElement<{ children?: React.ReactNode }>; direction?: string; variant?: DialogStyle };
+type AnimatedPopupProps = { placement: Placement; popupRef: Ref<HTMLDivElement>; animationRef: Ref<Animation>; reduceMotion: boolean | null; directionId: string; contentRef: Ref<HTMLDivElement>; triggerContentRef: Ref<HTMLSpanElement>; triggerContent: React.ReactNode; variant: DialogStyle };
+
+function getPosition(trigger: DOMRect, direction: string) {
   const margin = 16;
   const width = Math.min(360, window.innerWidth - margin * 2);
   const height = Math.min(230, window.innerHeight - margin * 2);
@@ -30,16 +37,16 @@ function getPosition(trigger, direction) {
   return { left: Math.max(margin, Math.min(x, window.innerWidth - width - margin)), top: Math.max(margin, Math.min(y, window.innerHeight - height - margin)), width, height };
 }
 
-export function ReshapeDialog({ trigger, direction = 'expand', variant = 'blue' }) {
+export function ReshapeDialog({ trigger, direction = 'expand', variant = 'blue' }: DialogProps) {
   const selectedStyle = Object.hasOwn(dialogSpec.styles, variant) ? variant : 'blue';
   const selectedDirection = dialogSpec.directions[direction] ? direction : 'expand';
   const [open, setOpen] = useState(false);
-  const [placement, setPlacement] = useState(null);
-  const triggerRef = useRef(null);
-  const popupRef = useRef(null);
-  const animationRef = useRef(null);
-  const contentRef = useRef(null);
-  const triggerContentRef = useRef(null);
+  const [placement, setPlacement] = useState<Placement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
+  const animationRef = useRef<Animation>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const triggerContentRef = useRef<HTMLSpanElement>(null);
   const closingRef = useRef(false);
   const reduceMotion = useReducedMotion();
 
@@ -54,7 +61,7 @@ export function ReshapeDialog({ trigger, direction = 'expand', variant = 'blue' 
     };
   }
 
-  function handleOpenChange(nextOpen) {
+  function handleOpenChange(nextOpen: boolean) {
     if (nextOpen) {
       if (!triggerRef.current) return;
       closingRef.current = false;
@@ -68,7 +75,7 @@ export function ReshapeDialog({ trigger, direction = 'expand', variant = 'blue' 
     }
     if (closingRef.current) return;
     const target = triggerTransform();
-    if (reduceMotion || !target || !popupRef.current) {
+    if (reduceMotion || !target || !popupRef.current || !placement) {
       setOpen(false);
       return;
     }
@@ -96,7 +103,7 @@ export function ReshapeDialog({ trigger, direction = 'expand', variant = 'blue' 
 }
 
 
-function AnimatedPopup({ placement, popupRef, animationRef, reduceMotion, directionId, contentRef, triggerContentRef, triggerContent, variant }) {
+function AnimatedPopup({ placement, popupRef, animationRef, reduceMotion, directionId, contentRef, triggerContentRef, triggerContent, variant }: AnimatedPopupProps) {
   const box = placement.triggerBox;
   const origin = {
     x: box.left + box.width / 2 - (placement.left + placement.width / 2),

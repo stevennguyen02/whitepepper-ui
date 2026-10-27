@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAnimate, useReducedMotion } from 'motion/react';
-import { Button } from '../base-ui/packages/react/src/button/index.ts';
+import { Button } from '@base-ui/react/button';
 // Feature IDs are stable references shared by all instances of this component.
 export const buttonSpec = {
   id: 'wp.component.button',
@@ -13,13 +13,16 @@ export const buttonSpec = {
   },
 };
 
-export const JellyButton = React.forwardRef(function JellyButton({ children, onClick, className = '', variant = 'blue', shape = 'pill', ...props }, forwardedRef) {
+export type ButtonStyle = keyof typeof buttonSpec.styles;
+export type JellyButtonProps = Omit<React.ComponentPropsWithoutRef<'button'>, 'color'> & { variant?: ButtonStyle; shape?: 'pill' | 'square' };
+
+export const JellyButton = React.forwardRef<HTMLElement, JellyButtonProps>(function JellyButton({ children, onClick, className = '', variant = 'blue', shape = 'pill', ...props }, forwardedRef) {
   const selectedStyle = buttonSpec.styles[variant] ? variant : 'blue';
   const [scope, animate] = useAnimate();
   const reduceMotion = useReducedMotion();
 
-  function handleClick(event) {
-    if (!reduceMotion) {
+  function handleClick(event: React.MouseEvent<HTMLButtonElement>) {
+    if (!reduceMotion && scope.current) {
       animate(scope.current, {
         scaleX: [1, 1.16, 0.9, 1.07, 0.97, 1],
         scaleY: [1, 0.86, 1.12, 0.94, 1.03, 1],
@@ -28,8 +31,8 @@ export const JellyButton = React.forwardRef(function JellyButton({ children, onC
     onClick?.(event);
   }
 
-  function setRefs(node) {
-    scope.current = node;
+  function setRefs(node: HTMLElement | null) {
+    (scope as { current: HTMLElement | null }).current = node;
     if (typeof forwardedRef === 'function') forwardedRef(node);
     else if (forwardedRef) forwardedRef.current = node;
   }

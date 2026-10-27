@@ -1,22 +1,24 @@
 import React, { useRef, useState } from 'react';
-import { AgentScreen } from './AgentPreview.jsx';
-import { agentSystemPrompt } from './agent-library.jsx';
+import { AgentScreen, type AgentRenderError } from './AgentPreview';
+import { agentSystemPrompt } from './agent-library';
 
 const suggestions = ['Spawn a button in the main region', 'Place a dark dialog in the side region', 'Try a dialog that opens at 3 o’clock'];
+
+type ChatMessage = { role: 'user' | 'assistant'; content: string };
 
 export function Play() {
   const [endpoint, setEndpoint] = useState('http://127.0.0.1:3001/chat');
   const [connected, setConnected] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
   const [draft, setDraft] = useState('');
-  const [messages, setMessages] = useState([]);
-  const [output, setOutput] = useState(null);
-  const [renderErrors, setRenderErrors] = useState([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [output, setOutput] = useState<string | null>(null);
+  const [renderErrors, setRenderErrors] = useState<AgentRenderError[]>([]);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  function saveEndpoint(event) {
+  function saveEndpoint(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     try {
       const url = new URL(endpoint.trim());
@@ -28,12 +30,12 @@ export function Play() {
     } catch { setError('Use an HTTPS endpoint or a local HTTP endpoint.'); }
   }
 
-  async function send(event) {
+  async function send(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = draft.trim();
     if (!text || busy) return;
     if (!connected) { setError('Add an agent endpoint to send a prompt.'); setConfigOpen(true); return; }
-    const next = [...messages, { role: 'user', content: text }];
+    const next: ChatMessage[] = [...messages, { role: 'user', content: text }];
     setMessages(next); setDraft(''); setBusy(true); setError('');
     try {
       const response = await fetch(endpoint, {
@@ -45,7 +47,7 @@ export function Play() {
       if (typeof data.message !== 'string' || typeof data.output !== 'string') throw new Error('The endpoint must return JSON with message and output strings.');
       setMessages([...next, { role: 'assistant', content: data.message }]);
       setOutput(data.output); setRenderErrors([]);
-    } catch (err) { setError(err.message || 'Could not reach the agent endpoint.'); }
+    } catch (err) { setError(err instanceof Error ? err.message : 'Could not reach the agent endpoint.'); }
     finally { setBusy(false); }
   }
 

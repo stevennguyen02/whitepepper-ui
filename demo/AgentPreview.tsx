@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
-import { Renderer } from '@openuidev/react-lang';
-import { agentLibrary, agentSystemPrompt, exampleAgentOutput } from './agent-library.jsx';
+import { Renderer, type RendererProps } from '@openuidev/react-lang';
+import { agentLibrary, agentSystemPrompt, exampleAgentOutput } from './agent-library';
 
 // Accept an agent's complete or streaming OpenUI Lang response from the host app.
-export function AgentScreen({ response, isStreaming = false, onAction, onError }) {
+export type AgentScreenProps = Pick<RendererProps, 'response' | 'isStreaming' | 'onAction' | 'onError'>;
+export type AgentRenderError = Parameters<NonNullable<RendererProps['onError']>>[0][number];
+
+export function AgentScreen({ response, isStreaming = false, onAction, onError }: AgentScreenProps) {
   return <Renderer library={agentLibrary} response={response} isStreaming={isStreaming} onAction={onAction} onError={onError} />;
 }
 
 export function AgentPreview() {
   const [response, setResponse] = useState(exampleAgentOutput);
-  const [errors, setErrors] = useState([]);
+  const [errors, setErrors] = useState<AgentRenderError[]>([]);
   return (
     <section className="agent-demo" aria-labelledby="agent-demo-title">
       <div className="section-heading"><div><h2 id="agent-demo-title">Agent rendering</h2><p>Preview an agent response using White Pepper components.</p></div></div>

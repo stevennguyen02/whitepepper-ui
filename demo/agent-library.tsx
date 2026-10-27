@@ -1,8 +1,8 @@
 import React from 'react';
 import { createLibrary, defineComponent } from '@openuidev/react-lang';
 import { z } from 'zod/v4';
-import { JellyButton, buttonSpec } from './JellyButton.jsx';
-import { ReshapeDialog, dialogSpec } from './ReshapeDialog.jsx';
+import { JellyButton, buttonSpec } from './JellyButton';
+import { ReshapeDialog, dialogSpec } from './ReshapeDialog';
 
 const Button = defineComponent({
   name: 'WhitePepperButton',
