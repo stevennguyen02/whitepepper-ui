@@ -1,0 +1,16 @@
+# Local upstream checkouts (see README for setup)
+/base-ui/
+/motion/
+/openui/
+
+# Dependencies and generated output
+node_modules/
+demo/dist/
+coverage/
+*.log
+
+# Local secrets and machine-specific files
+.env
+.env.*
+!.env.example
+.DS_Store
