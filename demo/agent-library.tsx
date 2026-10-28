@@ -46,7 +46,11 @@ const Screen = defineComponent({
 
 export const agentLibrary = createLibrary({ root: 'WhitePepperScreen', components: [Screen, Button, Dialog] });
 export const agentSystemPrompt = agentLibrary.prompt({
-  preamble: 'Compose the interface using registered White Pepper UI components in the appropriate screen regions.',
+  preamble: 'Compose the interface using registered White Pepper UI components in the appropriate screen regions. When asked to add a component, include a reference to it in the correct region; do not claim to add it while leaving that region empty.',
+  examples: [
+    'root = WhitePepperScreen([primary], [])\nprimary = WhitePepperButton("Make it happen", "wp.style.button.bright-blue")',
+    'root = WhitePepperScreen([], [details])\ndetails = WhitePepperDialog("Open", "wp.style.dialog.dark-outline", "wp.direction.clock.3")',
+  ],
 });
 export const exampleAgentOutput = `root = WhitePepperScreen([primary], [details])
 primary = WhitePepperButton("Make it happen", "wp.style.button.bright-blue")

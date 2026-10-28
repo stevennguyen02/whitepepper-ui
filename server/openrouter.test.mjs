@@ -38,3 +38,34 @@ test('missing keys and invalid provider responses return helpful errors', async 
     assert.equal(typeof (await response.json()).error, 'string');
   }
 });
+
+test('Ollama requests use the selected local model without an API key', async (t) => {
+  let seen;
+  const server = createAgentServer({ apiKey: '', fetchImpl: async (url, options) => {
+    seen = { url, headers: options.headers, body: JSON.parse(options.body) };
+    return new Response(JSON.stringify({ message: { content: JSON.stringify({ message: 'Done', output: 'root = WhitePepperScreen([], [])' }) } }));
+  } });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => server.close());
+  const response = await fetch(`http://127.0.0.1:${server.address().port}/chat`, { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json' }, body: JSON.stringify({ ...request, provider: 'ollama', model: 'gemma4:e2b' }) });
+  assert.equal(response.status, 200);
+  assert.equal(seen.url, 'http://127.0.0.1:11434/api/chat');
+  assert.equal(seen.body.model, 'gemma4:e2b');
+  assert.equal(seen.body.stream, false);
+  assert.equal(seen.headers.Authorization, undefined);
+  assert.equal((await response.json()).message, 'Done');
+});
+
+test('OpenRouter accepts a key from Play without exposing it in the response', async (t) => {
+  let authorization;
+  const server = createAgentServer({ apiKey: '', fetchImpl: async (_url, options) => {
+    authorization = options.headers.Authorization;
+    return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ message: 'Done', output: 'root = WhitePepperScreen([], [])' }) } }] }));
+  } });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => server.close());
+  const response = await fetch(`http://127.0.0.1:${server.address().port}/chat`, { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json' }, body: JSON.stringify({ ...request, provider: 'openrouter', apiKey: 'test-key-from-page' }) });
+  assert.equal(response.status, 200);
+  assert.equal(authorization, 'Bearer test-key-from-page');
+  assert.doesNotMatch(await response.text(), /test-key-from-page/);
+});

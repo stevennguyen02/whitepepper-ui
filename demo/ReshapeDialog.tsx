@@ -1,9 +1,32 @@
+'use client';
+import './ReshapeDialog.css';
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import { animate, useReducedMotion } from 'motion/react';
 import { Dialog } from '@base-ui/react/dialog';
 
 export const dialogSpec = {
   id: 'wp.component.dialog',
+  portability: {
+    "defaults": {
+      "variant": "blue",
+      "direction": "expand"
+    },
+    "example": {
+      "slots": {
+        "trigger": {
+          "componentId": "wp.component.button",
+          "props": {
+            "variant": "$variant",
+            "shape": "square"
+          },
+          "children": "Open"
+        }
+      }
+    },
+    "related": [
+      "wp.component.button"
+    ]
+  },
   animation: { id: 'wp.animation.dialog.reshape', label: 'Reshape', description: 'Morphs between the activating element and the dialog.' },
   styles: {
     blue: { id: 'wp.style.dialog.bright-blue', label: 'Bright blue', description: 'Blue fill and white text.', background: '#0061e8' },

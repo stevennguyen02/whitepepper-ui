@@ -54,33 +54,45 @@ Keep existing IDs stable and preserve their meaning. A distinct saved look or be
 
 The catalogue includes `wp.component.dialog` and its `wp.animation.dialog.reshape` transition, with `wp.style.dialog.bright-blue` and `wp.style.dialog.dark-outline` styles. The trigger can be any button-compatible React element that forwards its ref and passed props to the activating DOM element. The dialog measures that element and reshapes from its bounds, background, and corner radius. `wp.direction.expand` grows around the trigger; `wp.direction.clock.1` through `wp.direction.clock.12` grow toward that hour. Placement is kept inside the viewport where possible, so near an edge it may be adjusted. Reduced-motion settings skip the transition.
 
+## Card preview
+
+The catalogue includes `wp.component.card`, a `wp.shape.rectangle` card (300×190 by default; set `width` and `height` in pixels) with the `wp.animation.card.spin-in` entrance, in `wp.style.card.bright-blue` or `wp.style.card.dark-outline`. It appears as a small rounded square and grows as if pulled from its bottom-right corner, while turning a quarter turn counterclockwise into place. It overshoots its resting angle, bounces back and settles. Its content fades in at the end. The animation is skipped when reduced motion is requested. `cardSpec` in `demo/Card.tsx` is the card's source of truth.
+
+## Attention cue preview
+
+`wp.component.attention-cue` wraps a button or other component to draw attention to it. Its `wp.style.attention-cue.border` style draws a ring just outside the wrapped component; `wp.animation.attention-cue.orbit-glow` gives the ring a soft, breathing glow and a brighter light of the same color that circles it. Set `color` to a hex value (`#rgb` or `#rrggbb`; invalid values fall back to `#0061e8`), `spinDuration` to the seconds per turn (lower is faster), and `radius` and `offset` in pixels to match the wrapped component's corners (999 suits pill buttons). The rendered wrapper exposes `data-wp-color` and `data-wp-spin-duration` alongside its feature IDs. The light stops circling when reduced motion is requested. `attentionCueSpec` in `demo/AttentionCue.tsx` is the source of truth.
+
 ## OpenUI integration
 
 `demo/agent-library.tsx` registers the existing White Pepper button and dialog with OpenUI and exports `agentLibrary` and `agentSystemPrompt`. Component style and direction options use their `wp.*` IDs. The `WhitePepperScreen` root exposes two named regions (`main` and `side`); the host application decides what each region means and where it appears.
 
-`AgentScreen` in `demo/AgentPreview.tsx` accepts `response`, `isStreaming`, `onAction`, and `onError`, so a host can pass OpenUI Lang from an agent or model stream to the renderer. The Play page can use the local OpenRouter backend or another compatible agent endpoint and render its OpenUI response. The example button jiggles and the example dialog opens fixed sample content; application actions are not yet implemented. The integration uses local OpenUI source; it does not use OpenUI's prebuilt visual component library or a hosted gateway.
+`AgentScreen` in `demo/AgentPreview.tsx` accepts `response`, `isStreaming`, `onAction`, and `onError`, so a host can pass OpenUI Lang from an agent or model stream to the renderer. The Play page can use Ollama or OpenRouter through the local agent backend, or another compatible agent endpoint and render its OpenUI response. The example button jiggles and the example dialog opens fixed sample content; application actions are not yet implemented. The integration uses local OpenUI source; it does not use OpenUI's prebuilt visual component library or a hosted gateway.
 
 ## Connect Play to an agent
 
-### Use OpenRouter locally
+### Use Ollama or OpenRouter locally
 
-Create an API key in [OpenRouter](https://openrouter.ai/settings/keys). In a separate terminal, from this project directory, run the following; paste your key only into the hidden terminal prompt, never into the browser or chat:
+Start the catalogue and agent server in separate terminals:
 
 ```sh
-read -s "OPENROUTER_API_KEY?OpenRouter API key: "
-export OPENROUTER_API_KEY
+npm run dev
+```
+
+```sh
 npm run agent
 ```
 
-Keep that terminal running. In another terminal run `npm run dev`, open the catalogue, select **Play**, choose **Connect agent**, and save the prefilled `http://127.0.0.1:3001/chat` endpoint. Prompts and conversation context are sent to OpenRouter. The local server is bound to loopback and the key stays in the server environment. Stop it with `Ctrl+C`.
+In **Play → Connect agent**, choose **Ollama** and enter an installed model. The default is `gemma4:e2b`, served at `http://127.0.0.1:11434`. Start Ollama and install the model before sending prompts. To use an Ollama server at another address, set `OLLAMA_HOST` in the agent server's environment before starting it.
 
-The default model is `openrouter/auto`; OpenRouter chooses a model and usage can incur charges. To use a specific model, set `OPENROUTER_MODEL` before running `npm run agent`, for example `export OPENROUTER_MODEL="provider/model"`. The selected model must support JSON output. This is a local development endpoint, not a production server.
+To use **OpenRouter**, select it in Play and enter your API key in the password field, or set `OPENROUTER_API_KEY` in the agent server's environment. A key entered in Play is held in page memory and sent to the local agent server with each request; it is never saved to disk. Don't paste a key into chat or a URL. The default model is `openrouter/auto`; usage can incur charges. You can enter another OpenRouter model in Play.
+
+Both options use the local agent endpoint at `http://127.0.0.1:3001/chat`; the agent server forwards prompts and context to the selected provider. It is a local development endpoint, not a production server. Stop either server with `Ctrl+C`.
 
 ### Use another endpoint
 
 Choose Play and select **Connect agent**. Enter an HTTPS URL or a local HTTP URL for a backend you control. The address stays in the current page session and is not saved to disk. The browser sends prompts and the generated White Pepper system instructions to that endpoint; configure CORS on the endpoint if it uses a different origin. Never put a model API key in the URL or browser code.
 
-The endpoint receives a JSON `POST` with this shape:
+A compatible endpoint receives a JSON `POST` with this shape (the local agent also accepts `provider`, `model`, and an optional `apiKey`):
 
 ```json
 {
@@ -99,3 +111,38 @@ It returns a JSON object with a conversational `message` and an OpenUI Lang `out
 ```
 
 The backend is responsible for calling an agent or model and protecting its credentials. Play also sends the current OpenUI program as `currentOutput` so the agent can preserve or modify it on follow-up turns. Play currently accepts a complete JSON response, not streamed responses. The available generated components, style IDs, and screen regions are defined in `demo/agent-library.tsx`.
+
+## Portable component prompts and starter folder
+
+Every component is **Prompt exportable**. Select its style and controls, then
+choose **Download export prompt (.md)**. It carries actual source,
+CSS, types, stable feature IDs, selected props, local dependencies and import steps
+for an agent working in another project. Prompts are always procedural; this
+feature never calls an agent or model.
+
+Choose **Get started** beside **Explore components** on Browse to jump to the
+setup walkthrough at the bottom of the page. Download the empty `whitepepper_ui/`
+starter there, extract it beside your project’s `package.json` (outside `src/`),
+and open that project root in your coding agent. Download a component’s export
+prompt, then attach the Markdown file or paste its complete contents. The walkthrough includes real screenshots
+of folder placement, prompt export and the growing identifier tree, plus
+instructions for attaching the Markdown file in Codex.
+The starter includes agent instructions, a registry and a growing component tree. The agent stores
+components in `whitepepper_ui/components/` and runs the included registry rebuild
+script after changes. No OpenUI install, upstream clones or catalogue backend is
+needed. Base UI, Motion and their transitive runtime dependencies now ship locally
+in `vendor/`. The destination supplies React/ReactDOM and their type declarations.
+Component prompts reuse the matching runtime from the dedicated starter download;
+they do not include runtime or setup files. Download and extract the starter first.
+The registry rebuild verifies runtime file checksums.
+
+Future components with the standard component-owned `wp.component.*` spec are
+automatically discovered by the source exporter. Each preview exposes
+**Prompt exportable** with its selected settings; there is no per-component prompt
+to author. The setup download is a starter with zero components and all shared
+runtime/instructions. The optional **Inspect your local registry** disclosure at
+the end of the walkthrough loads a destination project’s `registry.json` to view
+a manual snapshot of its local tree; agents use the local files directly.
+
+See [the export architecture and contribution contract](docs/prompt-exports.md).
+Run `npm run test:exports` for procedural export, ZIP and registry checks.

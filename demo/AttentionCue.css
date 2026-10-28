@@ -1,0 +1,12 @@
+@import "./portable/tokens.css";
+
+@property --wp-attention-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.wp-attention { --wp-attention-color: #0061e8; --wp-attention-spin: 2.4s; --wp-attention-radius: 999px; --wp-attention-offset: 5px; --wp-attention-width: 2px; position: relative; display: inline-grid; isolation: isolate; border-radius: var(--wp-attention-radius); }
+.wp-attention__layer { position: absolute; inset: calc(-1 * var(--wp-attention-offset)); z-index: -1; border-radius: calc(var(--wp-attention-radius) + var(--wp-attention-offset)); pointer-events: none; }
+.wp-attention__glow { border: var(--wp-attention-width) solid color-mix(in srgb, var(--wp-attention-color) 50%, transparent); box-shadow: 0 0 16px 2px color-mix(in srgb, var(--wp-attention-color) 45%, transparent), inset 0 0 8px color-mix(in srgb, var(--wp-attention-color) 25%, transparent); animation: wp-attention-breathe 2.8s ease-in-out infinite; }
+.wp-attention__beam { box-sizing: border-box; padding: var(--wp-attention-width); background: conic-gradient(from var(--wp-attention-angle), transparent 0 68%, color-mix(in srgb, var(--wp-attention-color) 80%, transparent) 86%, color-mix(in srgb, var(--wp-attention-color) 60%, #fff) 96%, transparent 100%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); animation: wp-attention-spin var(--wp-attention-spin) linear infinite; }
+.wp-attention__bloom { filter: blur(5px); }
+.wp-attention__bloom > .wp-attention__beam { position: absolute; inset: 0; border-radius: inherit; padding: calc(var(--wp-attention-width) + 2px); }
+@keyframes wp-attention-spin { to { --wp-attention-angle: 360deg; } }
+@keyframes wp-attention-breathe { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) { .wp-attention__beam, .wp-attention__glow { animation: none; } }

@@ -1,10 +1,11 @@
 import { defineConfig } from 'vite';
+import { portabilityPlugin } from './portability-plugin.mjs';
 import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath } from 'node:url';
 
 export default defineConfig({
   root: 'demo',
-  plugins: [tailwindcss()],
+  plugins: [tailwindcss(), portabilityPlugin()],
   // OpenUI's source entry expects this compile-time environment value.
   define: { 'process.env': JSON.stringify({ NODE_ENV: 'production' }) },
   resolve: {

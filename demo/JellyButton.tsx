@@ -1,9 +1,24 @@
+'use client';
+import './JellyButton.css';
 import React from 'react';
 import { useAnimate, useReducedMotion } from 'motion/react';
 import { Button } from '@base-ui/react/button';
 // Feature IDs are stable references shared by all instances of this component.
 export const buttonSpec = {
   id: 'wp.component.button',
+  portability: {
+    "defaults": {
+      "variant": "blue",
+      "shape": "pill"
+    },
+    "example": {
+      "children": "Make it happen"
+    },
+    "related": [
+      "wp.component.dialog",
+      "wp.component.attention-cue"
+    ]
+  },
   shape: { id: 'wp.shape.pill', label: 'Pill', description: 'Fully rounded button ends.' },
   squareShape: { id: 'wp.shape.square', label: 'Square', description: 'Equal width and height with softly rounded corners.' },
   animation: { id: 'wp.animation.jello-click', label: 'Jello on click', description: 'A squish and rebound on activation; skipped for reduced motion.' },

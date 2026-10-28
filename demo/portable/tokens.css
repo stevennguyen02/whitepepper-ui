@@ -1,0 +1,8 @@
+/* Scoped baseline: no page reset, Tailwind, remote fonts or upstream aliases. */
+:where(.jelly-button, .wp-card-stage, .reshape-dialog, .wp-attention) {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+}
+:where(.jelly-button, .wp-card-stage, .wp-card-stage *, .reshape-dialog, .reshape-dialog *, .wp-attention, .wp-attention *) {
+  box-sizing: border-box;
+}
